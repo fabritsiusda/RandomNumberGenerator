@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generator</title>
+    <script>
+
+    	let socket = new WebSocket("ws://localhost:8080/generate");
+
+    	socket.onopen = function(e) {
+  			alert("connected");
+  			document.getElementById('auto').disabled = false;
+  			document.getElementById('generate').disabled = false;
+		};
+
+		socket.onclose = function(event) {
+  			alert('closed');
+		};
+
+		socket.onerror = function(error) {
+			alert('error');
+		};
+
+    	socket.onmessage = function(event){
+    		var data = JSON.parse(event.data).data;
+    		if (!Array.isArray(data)){
+    			alert(data)
+    			return;
+    		} 
+    		var table = document.getElementById('output');
+    		var tbody = document.createElement('tbody');
+    		for (var i = 0; i < data.length; i++){
+    			var tr = document.createElement('tr');	
+    			for (var j = 0; j < data[i].length; j++){
+    				var td = document.createElement('td');
+    				td.appendChild(document.createTextNode(data[i][j]));
+					tr.appendChild(td);    				
+    			}
+    			tbody.appendChild(tr);
+    		}
+    		table.appendChild(tbody);
+    		
+    	};
+
+    	function clickOnGenerate(){
+    		var count = document.getElementById('count').value;
+    		socket.send('{count:' + count + '}');
+    	};
+
+    	function clickOnAuto(){
+    		socket.send('{count:-1}');	
+    	};
+
+    </script>
+</head>
+<body>
+<h1>
+    Type count:<input type="text" id="count">
+    <button id="auto" onclick="clickOnGenerate()" disabled>Generate</button>
+    <br>
+    <button id="generate" onclick="clickOnAuto()" disabled>Auto</button>
+    <br>
+</h1>
+<h6>
+    <table id="output" border="1">
+
+    </table>
+</h6>
+</body>
+</html>
